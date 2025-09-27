@@ -333,18 +333,26 @@ spec:
 {{- end }}
 
 ```
-15. `  `
-16. `  `
-```
-Поле для вставки кода...
-....
-....
-....
-....
-```
+15. `Установка и проверка.  `
 
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота 1](ссылка на скриншот 1)`
+```
+helm install myapp ./myapp -n myapp --create-namespace -f myapp/values-dev.yaml
+kubectl -n myapp get pods,svc,ingress
+```
+![1](https://github.com/Foxbeerxxx/Helm/blob/main/img/img1.png)
+
+
+
+16. `Добавляю в host и проверяю через Ingress `
+
+```
+echo "127.0.0.1 dev.myapp.local" | sudo tee -a /etc/hosts
+curl -i -H "Host: dev.myapp.local" http://127.0.0.1/
+```
+![2](https://github.com/Foxbeerxxx/Helm/blob/main/img/img2.png)
+
+
+`При необходимости прикрепитe сюда скриншоты`
 
 
 ---

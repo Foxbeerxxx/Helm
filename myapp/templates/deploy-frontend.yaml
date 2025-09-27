@@ -6,20 +6,27 @@ metadata:
 spec:
   replicas: {{ .Values.frontend.replicas }}
   selector:
-    matchLabels: { app: frontend }
+    matchLabels:
+      app: frontend
   template:
     metadata:
-      labels: { app: frontend }
+      labels:
+        app: frontend
     spec:
       containers:
-      - name: frontend
-        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        ports:
-        - containerPort: {{ .Values.frontend.port }}
-        envFrom:
-        - configMapRef: { name: myapp-config }
-        env:
-{{- toYaml .Values.frontend.env | nindent 8 }}
-        resources:
-{{- toYaml .Values.frontend.resources | nindent 10 }}
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
+          envFrom:
+            - configMapRef:
+                name: myapp-config
+          {{- with .Values.frontend.env }}
+          env:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- with .Values.frontend.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+          {{- end }}

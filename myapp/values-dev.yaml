@@ -1,14 +1,19 @@
 frontend:
   image:
-    tag: "1.0.1-dev"
+    repository: nginx
+    tag: "1.25-alpine"
   replicas: 1
+  port: 80
 
 backend:
   image:
-    tag: "1.0.1-dev"
+    repository: ealen/echo-server
+    tag: "0.8.16"
   replicas: 1
+  port: 80
 
 ingress:
   enabled: true
-  className: "nginx"
+  className: "public"
   host: dev.myapp.local
+

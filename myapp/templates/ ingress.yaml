@@ -4,9 +4,8 @@ kind: Ingress
 metadata:
   name: myapp
   namespace: {{ .Values.namespace }}
-  annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
 spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
   rules:
   - host: {{ .Values.ingress.host }}
     http:
