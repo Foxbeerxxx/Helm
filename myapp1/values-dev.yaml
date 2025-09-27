@@ -1,0 +1,18 @@
+frontend:
+  image:
+    repository: nginx
+    tag: ""     # берем из appVersion
+  replicas: 1
+  port: 80
+
+backend:
+  image:
+    repository: ealen/echo-server
+    tag: ""     # берем из appVersion
+  replicas: 1
+  port: 80
+
+ingress:
+  enabled: true
+  className: "public"
+  host: dev.myapp.local

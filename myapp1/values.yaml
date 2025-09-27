@@ -1,0 +1,37 @@
+imagePullPolicy: IfNotPresent
+
+frontend:
+  image:
+    repository: nginx
+    tag: ""            # пусто => возьмем .Chart.AppVersion
+  replicas: 2
+  port: 80
+  env: []
+  resources: {}
+
+backend:
+  image:
+    repository: ealen/echo-server
+    tag: ""            # пусто => возьмем .Chart.AppVersion
+  replicas: 2
+  port: 80
+  env: []
+  resources: {}
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16.3"
+  storage:
+    size: 10Gi
+  port: 5432
+  auth:
+    user: myapp
+    password: mysecret
+    db: myapp
+  resources: {}
+
+ingress:
+  enabled: false
+  className: ""   # например: public или nginx
+  host: myapp.local

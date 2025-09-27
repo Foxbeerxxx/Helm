@@ -1,0 +1,26 @@
+frontend:
+  image:
+    repository: nginx
+    tag: "1.25.3-alpine"
+  replicas: 3
+  resources:
+    requests: {cpu: "200m", memory: "256Mi"}
+    limits:   {cpu: "500m", memory: "512Mi"}
+
+backend:
+  image:
+    repository: ealen/echo-server
+    tag: "0.8.17"
+  replicas: 3
+  resources:
+    requests: {cpu: "300m", memory: "384Mi"}
+    limits:   {cpu: "800m", memory: "768Mi"}
+
+postgres:
+  storage:
+    size: 50Gi
+
+ingress:
+  enabled: true
+  className: "public"
+  host: myapp.example.com

@@ -1,0 +1,7 @@
+# Common ignores
+.git/
+*.swp
+*.tmp
+*.bak
+*.orig
+.DS_Store

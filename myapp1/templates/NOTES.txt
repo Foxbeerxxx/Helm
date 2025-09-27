@@ -1,0 +1,7 @@
+1) Hosts:
+   Add to /etc/hosts:
+     127.0.0.1 {{ .Values.ingress.host }}
+2) Access:
+   curl -H "Host: {{ .Values.ingress.host }}" http://127.0.0.1/
+3) Test:
+   helm -n {{ .Release.Namespace }} test {{ .Release.Name }}

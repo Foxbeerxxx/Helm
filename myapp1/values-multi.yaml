@@ -1,0 +1,9 @@
+# Удобный файл для развертывания нескольких копий
+ingress:
+  enabled: true
+  className: "public"
+
+frontend:
+  env: []
+backend:
+  env: []

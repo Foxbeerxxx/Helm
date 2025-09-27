@@ -366,32 +366,83 @@ image: "{{ .Values.frontend.image.repository }}:{{ default (default .Chart.AppVe
 helm -n myapp upgrade myapp ./myapp --reuse-values
 ```
 
-![2](https://github.com/Foxbeerxxx/Helm/blob/main/img/img2.png)
+![3](https://github.com/Foxbeerxxx/Helm/blob/main/img/img3.png)
 
 ---
 
 ### Задание 2
 
-`Приведите ответ в свободной форме........`
 
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
 
+1. `Создаем неймспейсы`
 ```
-Поле для вставки кода...
-....
-....
-....
-....
+kubectl create ns app1
+kubectl create ns app2
 ```
 
-`При необходимости прикрепитe сюда скриншоты
-![Название скриншота 2](ссылка на скриншот 2)`
+2. `Копия A в app1 (тег из appVersion)`
+```
+helm -n app1 upgrade --install myapp-a ./myapp1 \
+  -f myapp1/values-multi.yaml \
+  --set ingress.host=app1a.myapp.local
+```
+3. `Копия B в app1 (другая версия)`
 
+```
+helm -n app1 upgrade --install myapp-b ./myapp1 \
+  -f myapp1/values-multi.yaml \
+  --set ingress.host=app1b.myapp.local \
+  --set-string frontend.image.tag=1.25.2-alpine \
+  --set-string backend.image.tag=0.8.17
+```
+
+4. `Копия C в app2 (третья версия)`
+```
+helm -n app2 upgrade --install myapp-c ./myapp1 \
+  -f myapp1/values-multi.yaml \
+  --set ingress.host=app2.myapp.local \
+  --set-string frontend.image.tag=1.25.3-alpine \
+  --set-string backend.image.tag=0.8.17
+```
+5. `hosts и тест`
+```
+echo "127.0.0.1 app1a.myapp.local app1b.myapp.local app2.myapp.local" | sudo tee -a /etc/hosts
+for h in app1a.myapp.local app1b.myapp.local app2.myapp.local; do
+  curl -I -H "Host: $h" http://127.0.0.1/ | head -n1
+done
+```
+6. `Проверка развертываний и образов`
+
+```
+kubectl -n app1 get deploy,svc,ingress
+kubectl -n app2 get deploy,svc,ingress
+kubectl -n app1 get deploy -l app.kubernetes.io/name=frontend \
+  -o custom-columns=NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image
+kubectl -n app2 get deploy -l app.kubernetes.io/name=frontend \
+  -o custom-columns=NAME:.metadata.name,IMAGE:.spec.template.spec.containers[0].image
+```
+
+7. `HTTP-проверка`
+```
+curl -I -H "Host: app1a.myapp.local" http://127.0.0.1/
+curl -I -H "Host: app1b.myapp.local" http://127.0.0.1/
+curl -I -H "Host: app2.myapp.local"  http://127.0.0.1/
+
+```
+![4](https://github.com/Foxbeerxxx/Helm/blob/main/img/img4.png)
+
+8. `Результат`
+```
+helm list -A
+kubectl -n app1 get deploy,svc,ingress
+kubectl -n app2 get deploy,svc,ingress
+
+```
+![5](https://github.com/Foxbeerxxx/Helm/blob/main/img/img5.png)
+
+
+9. ``
+10. ``
 
 ---
 
