@@ -1,0 +1,14 @@
+frontend:
+  image:
+    tag: "1.0.1-dev"
+  replicas: 1
+
+backend:
+  image:
+    tag: "1.0.1-dev"
+  replicas: 1
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: dev.myapp.local

@@ -1,38 +1,340 @@
-# Домашнее задание к занятию "`Название занятия`" - `Фамилия и имя студента`
-
-
-### Инструкция по выполнению домашнего задания
-
-   1. Сделайте `fork` данного репозитория к себе в Github и переименуйте его по названию или номеру занятия, например, https://github.com/имя-вашего-репозитория/git-hw или  https://github.com/имя-вашего-репозитория/7-1-ansible-hw).
-   2. Выполните клонирование данного репозитория к себе на ПК с помощью команды `git clone`.
-   3. Выполните домашнее задание и заполните у себя локально этот файл README.md:
-      - впишите вверху название занятия и вашу фамилию и имя
-      - в каждом задании добавьте решение в требуемом виде (текст/код/скриншоты/ссылка)
-      - для корректного добавления скриншотов воспользуйтесь [инструкцией "Как вставить скриншот в шаблон с решением](https://github.com/netology-code/sys-pattern-homework/blob/main/screen-instruction.md)
-      - при оформлении используйте возможности языка разметки md (коротко об этом можно посмотреть в [инструкции  по MarkDown](https://github.com/netology-code/sys-pattern-homework/blob/main/md-instruction.md))
-   4. После завершения работы над домашним заданием сделайте коммит (`git commit -m "comment"`) и отправьте его на Github (`git push origin`);
-   5. Для проверки домашнего задания преподавателем в личном кабинете прикрепите и отправьте ссылку на решение в виде md-файла в вашем Github.
-   6. Любые вопросы по выполнению заданий спрашивайте в чате учебной группы и/или в разделе “Вопросы по заданию” в личном кабинете.
-   
-Желаем успехов в выполнении домашнего задания!
-   
-### Дополнительные материалы, которые могут быть полезны для выполнения задания
-
-1. [Руководство по оформлению Markdown файлов](https://gist.github.com/Jekins/2bf2d0638163f1294637#Code)
+# Домашнее задание к занятию "`Helm`" - `Татаринцев Алексей`
 
 ---
 
 ### Задание 1
 
-`Приведите ответ в свободной форме........`
 
-1. `Заполните здесь этапы выполнения, если требуется ....`
-2. `Заполните здесь этапы выполнения, если требуется ....`
-3. `Заполните здесь этапы выполнения, если требуется ....`
-4. `Заполните здесь этапы выполнения, если требуется ....`
-5. `Заполните здесь этапы выполнения, если требуется ....`
-6. 
 
+1. `Структура`
+
+```
+myapp/
+  Chart.yaml
+  values.yaml
+  values-dev.yaml
+  values-prod.yaml
+  templates/
+    namespace.yaml
+    configmap.yaml
+    svc-frontend.yaml
+    deploy-frontend.yaml
+    svc-backend.yaml
+    deploy-backend.yaml
+    sts-postgres.yaml
+    svc-postgres.yaml
+    ingress.yaml
+
+```
+
+2. `Chart.yaml`
+
+```
+apiVersion: v2
+name: myapp
+description: Multi-component app
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+```
+
+3. `values.yaml (общие)`
+```
+namespace: myapp
+
+imagePullPolicy: IfNotPresent
+
+frontend:
+  image:
+    repository: registry.example.com/myapp/frontend
+    tag: "1.0.0"
+  replicas: 2
+  port: 80
+  env: []
+  resources: {}
+
+backend:
+  image:
+    repository: registry.example.com/myapp/backend
+    tag: "1.0.0"
+  replicas: 2
+  port: 8080
+  env:
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: postgres-secret
+          key: url
+  resources: {}
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16.3"
+  storage:
+    size: 10Gi
+  port: 5432
+  auth:
+    user: myapp
+    password: mysecret
+    db: myapp
+  resources: {}
+
+ingress:
+  enabled: false
+  className: ""
+  host: myapp.local
+
+```
+
+4. `values-dev.yaml`
+
+```
+frontend:
+  image:
+    tag: "1.0.1-dev"
+  replicas: 1
+
+backend:
+  image:
+    tag: "1.0.1-dev"
+  replicas: 1
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: dev.myapp.local
+
+```
+
+5. `values-prod.yaml`
+```
+frontend:
+  image:
+    tag: "1.0.3"
+  replicas: 3
+  resources:
+    requests: {cpu: "200m", memory: "256Mi"}
+    limits:   {cpu: "500m", memory: "512Mi"}
+
+backend:
+  image:
+    tag: "1.0.3"
+  replicas: 3
+  resources:
+    requests: {cpu: "300m", memory: "384Mi"}
+    limits:   {cpu: "800m", memory: "768Mi"}
+
+postgres:
+  storage:
+    size: 50Gi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: myapp.example.com
+
+```
+6. ` templates/namespace.yaml `
+
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace }}
+```
+7. `templates/configmap.yaml `
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+  namespace: {{ .Values.namespace }}
+data:
+  APP_NAME: "myapp"
+
+```
+
+8. `templates/svc-frontend.yaml`
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: {{ .Values.frontend.port }}
+
+```
+
+9. ` templates/deploy-frontend.yaml `
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.frontend.port }}
+        envFrom:
+        - configMapRef: { name: myapp-config }
+        env:
+{{- toYaml .Values.frontend.env | nindent 8 }}
+        resources:
+{{- toYaml .Values.frontend.resources | nindent 10 }}
+
+```
+10. ` templates/svc-backend.yaml `
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 8080
+    targetPort: {{ .Values.backend.port }}
+
+```
+
+11. ` templates/deploy-backend.yaml `
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata:
+      labels: { app: backend }
+    spec:
+      containers:
+      - name: backend
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.backend.port }}
+        envFrom:
+        - configMapRef: { name: myapp-config }
+        env:
+{{- toYaml .Values.backend.env | nindent 8 }}
+        resources:
+{{- toYaml .Values.backend.resources | nindent 10 }}
+
+```
+12. ` templates/svc-postgres.yaml `
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+```
+13. ` templates/sts-postgres.yaml `
+
+```
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "{{ .Values.postgres.auth.user }}"
+        - name: POSTGRES_PASSWORD
+          value: "{{ .Values.postgres.auth.password }}"
+        - name: POSTGRES_DB
+          value: "{{ .Values.postgres.auth.db }}"
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.postgres.storage.size }}
+
+```
+14. ` templates/ingress.yaml `
+```
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp
+  namespace: {{ .Values.namespace }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+{{- end }}
+
+```
+15. `  `
+16. `  `
 ```
 Поле для вставки кода...
 ....

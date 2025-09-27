@@ -1,0 +1,24 @@
+frontend:
+  image:
+    tag: "1.0.3"
+  replicas: 3
+  resources:
+    requests: {cpu: "200m", memory: "256Mi"}
+    limits:   {cpu: "500m", memory: "512Mi"}
+
+backend:
+  image:
+    tag: "1.0.3"
+  replicas: 3
+  resources:
+    requests: {cpu: "300m", memory: "384Mi"}
+    limits:   {cpu: "800m", memory: "768Mi"}
+
+postgres:
+  storage:
+    size: 50Gi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: myapp.example.com
