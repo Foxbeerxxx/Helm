@@ -352,8 +352,21 @@ curl -i -H "Host: dev.myapp.local" http://127.0.0.1/
 ![2](https://github.com/Foxbeerxxx/Helm/blob/main/img/img2.png)
 
 
-`При необходимости прикрепитe сюда скриншоты`
+16. `Версии`
 
+```
+в Chart.yaml
+Меняю appVersion: "1.25-alpine"
+
+правлю image
+
+image: "{{ .Values.frontend.image.repository }}:{{ default (default .Chart.AppVersion .Values.global.imageTag) .Values.frontend.image.tag }}"
+
+Обновляю версию 
+helm -n myapp upgrade myapp ./myapp --reuse-values
+```
+
+![2](https://github.com/Foxbeerxxx/Helm/blob/main/img/img2.png)
 
 ---
 

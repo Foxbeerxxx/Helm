@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        image: "{{ .Values.frontend.image.repository }}:{{ default .Chart.AppVersion .Values.frontend.image.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.backend.port }}
